@@ -52,19 +52,33 @@ async def cmd_start(message: Message):
 
 @dp.message()
 async def handle_query(message: Message):
-    """Обработка текстовых запросов"""
+    """Обработка текстовых запросов с индикацией процесса"""
     try:
         user_id = message.from_user.id
         query = message.text
         
         logger.info(f"Новый запрос от {user_id}: {query}")
         
+        # Показать статус "печатает"
         await message.bot.send_chat_action(
             chat_id=message.chat.id, 
             action="typing"
         )
         
+        # Отправляем сообщение о поиске информации
+        search_msg = await message.answer("🔍 Ищу информацию в базе знаний...")
+        
+        # Запуск генерации ответа в отдельном потоке
         result = await asyncio.to_thread(generate_response, query)
+        
+        # Удаляем сообщение о поиске перед отправкой ответа
+        try:
+            await message.bot.delete_message(
+                chat_id=message.chat.id,
+                message_id=search_msg.message_id
+            )
+        except Exception as e:
+            logger.warning(f"Не удалось удалить сообщение поиска: {str(e)}")
         
         if not result or not result[0].strip():
             await message.answer("⚠️ Не удалось найти информацию по вашему запросу. Попробуйте переформулировать вопрос.")
@@ -72,8 +86,10 @@ async def handle_query(message: Message):
             
         answer, sources = result
         
+        # Форматирование ответа
         response_text = f"{answer}\n\n🔍 Источники:\n" + "\n".join(sources)
         
+        # Разбиваем сообщение на части если оно слишком длинное
         if len(response_text) > 4000:
             message_parts = split_message(response_text)
             for part in message_parts:
@@ -84,6 +100,16 @@ async def handle_query(message: Message):
     except Exception as e:
         logger.error(f"Ошибка обработки запроса: {str(e)}")
         await message.answer("🚫 Произошла внутренняя ошибка. Пожалуйста, попробуйте позже.")
+        
+        # Пытаемся удалить сообщение поиска и в случае ошибки
+        try:
+            if 'search_msg' in locals():
+                await message.bot.delete_message(
+                    chat_id=message.chat.id,
+                    message_id=search_msg.message_id
+                )
+        except:
+            pass
 
 async def main():
     """Запуск бота"""

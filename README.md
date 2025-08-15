@@ -8,33 +8,39 @@
 
 ## ⚙️ Установка и запуск
 1. Клонировать репозиторий:
+
 git clone https://github.com/your-username/product-research-bot.git
 
-cd product-research-bot
+    cd product-research-bot
 
 2. Создать виртуальное окружение и активировать его:
-python -m venv venv
 
-# Для Windows:
-venv\Scripts\activate
+    python -m venv venv
 
-# Для Linux/macOS:
-source venv/bin/activate
+    Для Windows:
+    venv\Scripts\activate
+
+    Для Linux/macOS:
+    source venv/bin/activate
 
 3. Установить зависимости:
-pip install -r requirements.txt
+
+    pip install -r requirements.txt
 
 4. Создать векторный индекс (база знаний):
-python data_preparation/create_faiss_index.py 
 
-При необходимости обогатить исчтоники
+    python data_preparation/create_faiss_index.py 
+
+    При необходимости обогатить исчтоники
 
 5. Создать файл .env:
-TELEGRAM_BOT_TOKEN="ваш_телеграм_токен"
-HF_API_TOKEN="ваш_hugging_face_токен"  # Для доступа к модели Qwen
 
-6.Запустить бота:
-python bot/main.py  
+    TELEGRAM_BOT_TOKEN="ваш_телеграм_токен"
+    HF_API_TOKEN="ваш_hugging_face_токен"  # Для доступа к модели Qwen
+
+6. Запустить бота: 
+
+    python bot/main.py  
 
 ## 🔧 Настройка параметров
 - MODEL_NAME = "Qwen/Qwen2.5-3B-Instruct"  # Используемая LLM
